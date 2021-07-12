@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Tenha o manual da sua empresa onde quer que você esteja">
+  <meta name="keywords" content="manual maker, manual, instruções, instructions, regras, orientações">
+  <title>Manual Maker</title>
+
+  <script src="https://cdn.ckeditor.com/4.16.1/standard-all/ckeditor.js"></script>
+
+  <style>
+    html{height: 100%;}
+    body{
+      max-width: 1280px;
+      margin: auto;
+      height: 100%;
+      position: relative;
+    }
+    body h1{
+      position: absolute;
+      top: 0;
+      left: 0;
+      margin: 0;
+    }
+    nav{
+      position: absolute;
+      top: 40px;
+      left: 0;
+      width: 300px;
+      height: calc(100% - 40px);
+    }
+    nav .elmnt_move{
+      cursor: move;
+      position: absolute;
+      z-index: 1;
+      transform: translate(-50%, -50%);
+      margin: 0;
+      padding: 0;
+    }
+    main{
+      margin-left: 300px;
+    }
+    .divNav_group{
+      margin-left: 3px;
+    }
+    .divNav_content{
+      overflow: hidden;
+      border: 2px solid black;
+      border-top: none;
+      background-color: white;
+      box-shadow: -2px 2px 2px black;
+      position: relative;
+    }
+    .btn_new_instruction{
+      cursor: pointer;
+      background-color: blue;
+      line-height: 40px;
+      width: 40px;
+      height: 40px;
+      color: white;
+      font-size: 2em;
+      font-weight: bold;
+      /* padding: 5px; */
+      border: none;
+      border-radius: 100%;
+      display: block;
+      margin: 5px auto;
+    }
+    .divNav_content:empty:not(.content_retracted){
+      height: 10px;
+    }
+    .content_retracted{
+      height: 0;
+    }
+    .divNav_description{
+      margin-top: 5px;
+      position: relative;
+      border: 2px solid black;
+      border-bottom: none;
+      border-radius: 25px 0 0 0;
+      box-shadow: -2px 3px 2px black;
+      overflow: hidden;
+    }
+    .divNav_description.selected{
+      background-color: green;
+    }
+    .divNav_description h2{
+      max-width: calc(100% - 25px);
+      cursor: pointer;
+      min-height: 27px;
+      margin: 5px;
+      margin-left: 25px;
+    }
+    .divNav_description h2[contenteditable="true"]{
+      cursor: text;
+      background-color: yellow;
+    }
+    .divNav_description button{
+      cursor: pointer;
+      width: 25px;
+      height: 25px;
+      border: none;
+      line-height: 25px;
+      margin: 0;
+      padding: 0;
+      font-size: 2em;
+      font-weight: bold;
+      background-color: transparent;
+      position: absolute;
+      display: block;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+    .divNav_description .img_move{
+      width: 25px;
+      height: 25px;
+      position: absolute;
+      display: block;
+      cursor: move;
+      top: 50%;
+      right: 10px;
+      transform: translateY(-50%);
+    }
+    .divNav_description .img_edit_description{
+      width: 25px;
+      height: 25px;
+      position: absolute;
+      display: block;
+      cursor: pointer;
+      top: 50%;
+      right: 45px;
+      transform: translateY(-50%);
+    }
+    .divNav_description .region_description{
+      height: 100%;
+      width: 33%;
+      font-size: 0.7em;
+      font-weight: bold;
+      display: block;
+      position: absolute;
+      background-color: black;
+      color: white;
+      transform: translateX(-50%);
+      top: 0;
+      padding: 2px;
+      text-align: center;
+      opacity: 0.7;
+    }
+    .hidde_regions .divNav_description .region_description{
+      display: none;
+    }
+    
+    .group_picker{
+      z-index: 2;
+      background-color: rgba(120,120,120,0.5);
+      /* opacity: 0.5; */
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      top: 0;
+      left: 0;
+      display: none;
+    }
+    .group_picker div{
+      width: 300px;
+      transform: translate(-50%, -50%);
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      background-color: white;
+      opacity: 1;
+    }
+    .group_picker button{
+      cursor: pointer;
+      margin: 15px auto;
+      display: block;
+      font-size: 2em;
+    }
+
+    .login{
+      z-index: 2;
+      background-color: rgba(120,120,120,0.5);
+      /* opacity: 0.5; */
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      top: 0;
+      left: 0;
+      display: none;
+    }
+    .login div{
+      width: 300px;
+      transform: translate(-50%, -50%);
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      background-color: white;
+      opacity: 1;
+      text-align: center;
+    }
+    .login label{
+      display: block;
+      margin: 10px 0;
+    }
+    .login button{
+      margin: 10px 0;
+    }
+  </style>
+</head>
+  <h1 id="groupName"></h1>
+  <nav class="hidde_regions"></nav>
+  <main>
+    <button onclick="(() => {window.location.pathname = '/';})()">Selecionar grupo</button>
+    <button onclick="saveList()" class="admin">Salvar lista</button>
+    <button onclick="saveContent()" class="admin">Salvar conteúdo</button>
+    <span>Revisão</span>
+    <select name="revision" id="revisionSelect" style="width: 150px;" onchange="((e) => {
+      const content = (contents.find((item) => item.id === parseInt(e.value, 0)) || {});
+      CKEDITOR.instances.editor.setData(content.content);
+      document.getElementById('publicCheckbox').checked = content.public;
+    })(this)"></select>
+    <button onclick="(() => {
+      if (itemSelected) {
+        const $select = document.getElementById('revisionSelect');
+        const $option = document.createElement('option');
+        let newId = -1;
+        for (const $child of $select.children) {
+          if ($child.getAttribute('value') === newId.toString()) newId -= 1;
+        }
+        $option.setAttribute('value', newId);
+        $option.innerText = `${$select.children.length + 1} - Não oficial`;
+        $select.appendChild($option);
+        $select.value = newId;
+        $select.onchange($select);
+      }
+    })(this)" class="admin">Nova revisão</button>
+    <label class="admin">Oficial<input type="checkbox" id="publicCheckbox"></label>
+    <br>
+    <button onclick="(() => {document.querySelector('.login').style.display = 'block';})()">Login</button>
+    <span id="username"></span>
+    <button onclick="(() => {
+      localStorage.setItem('user', '');
+      document.getElementById('username').innerText = '';
+      editor.setReadOnly(true);
+      enableAdmin(false);
+    })()">Logout</button>
+    <div id="editor"></div>
+  </main>
+  <div class="group_picker" id="group_picker"><div></div></div>
+  <div class="login">
+    <div id="login">
+      <label>E-mail: <input type="email" name="email" id="email"></label>
+      <label>Senha: <input type="password" name="password" id="password"></label>
+      <button onclick="login()">Login</button>
+      <button onclick="(() => {
+        document.querySelector('.login').style.display = 'none';
+      })()">Cancelar</button>
+    </div>
+  </div>
+
+  <script>
+    let saveItems = false;
+    let itemSelected = null;
+    let contents = [];
+    let groupName = 'geral';
+    let baseURL = `${window.location.protocol}//${window.location.host}/api`;
+    let editor;
+    const $nav = document.querySelector('body nav');
+
+    // verifica url e acerta visualização
+    if (window.location.pathname === '/') loadListGroups();
+    else {
+      groupName = window.location.pathname.split('/')[1].replace(/\%20/g, ' ');
+      document.getElementById('groupName').innerText = groupName;
+      // requisição da lista inicial
+      httpRequest('GET', `list/${groupName}`, null, (xhttp) => {
+        loadNavBar(JSON.parse(xhttp.responseText));
+        const idUrl = parseInt(window.location.pathname.split('/')[2]);
+        if (!isNaN(idUrl)) {
+          itemSelected = document.getElementById(idUrl);
+          itemSelected.firstChild.classList.add('selected');
+          loadContent();
+
+          let $divGroupParent = itemSelected.parentElement.parentElement;
+          while ($divGroupParent.className.includes('divNav_group')) {
+            $divGroupParent.firstChild.firstChild.nextElementSibling.innerText = collapseContentNav($divGroupParent.firstChild.nextElementSibling, '+');
+            $divGroupParent = $divGroupParent.parentElement.parentElement;
+          }
+        }
+      })
+    }
+
+    // editor content
+    CKEDITOR.replace('editor', {
+      extraAllowedContent: 'h3{clear};h2{line-height};h2 h3{margin-left,margin-top}',
+
+      // Adding drag and drop image upload.
+      extraPlugins: 'print,format,font,colorbutton,justify,uploadimage',
+      uploadUrl: `/api/upload/${groupName}`,
+
+      // Configure your file manager integration. This example uses CKFinder 3 for PHP.
+      filebrowserBrowseUrl: `/api/upload/${groupName}`,
+      filebrowserImageBrowseUrl: `/api/upload/${groupName}`,
+      filebrowserUploadUrl: `/api/upload/${groupName}`,
+      filebrowserImageUploadUrl: `/api/upload/${groupName}`,
+
+      height: 560,
+
+      removeDialogTabs: 'image:advanced;link:advanced'
+    });
+
+    // The instanceReady event is fired when an instance of CKEditor 4 has finished
+    // its initialization.
+    CKEDITOR.on('instanceReady', function(ev) {
+      editor = ev.editor;
+      if (document.getElementById('username').innerText && itemSelected) editor.setReadOnly(false);
+      else editor.setReadOnly(true);
+    });
+    // editor.setReadOnly(true);
+
+    function httpRequest(verb, urlEnd, request, callback, callbackError) {
+      let xhttp = new XMLHttpRequest();
+  
+      // download da lista geral
+      xhttp.open(verb, `${baseURL}/${urlEnd || ''}`, true);
+
+      // headers
+      if (localStorage.getItem('user')) {
+        const user = JSON.parse(localStorage.getItem('user'));
+        xhttp.setRequestHeader('Authorization', `Bearer ${user.token}`)
+      }
+
+      xhttp.onreadystatechange = function(){
+        if ( xhttp.readyState == 4 && [200, 201].indexOf(xhttp.status) >= 0 )
+          if (callback) callback(xhttp);
+        else
+          if (callbackError) callbackError(xhttp);
+      }
+      xhttp.send(request || null);
+    }
+
+    // função para tornar o conteúdo visível
+    function collapseContentNav(element, innerText) {
+      if (element) {
+        const classes = element.className.split(' ');
+        element.className = classes.filter((item) => item !== 'content_retracted').join(' ');
+      }
+      if (innerText === '-') {
+        if (element) element.className = `${element.className} content_retracted`;
+        return '+';
+      }
+      return '-';
+    }
+
+    function loadListGroups() {
+      httpRequest('GET', `list`, null, (xhttp) => {
+        const listGroups = JSON.parse(xhttp.responseText);
+        const $group_picker = document.getElementById('group_picker');
+        $group_picker.style.display = 'block';
+
+        listGroups.forEach((group) => {
+          const $button = document.createElement('button');
+          $button.innerText = group.name;
+          $button.addEventListener('click', (e) => {
+            groupName = e.target.innerText;
+            document.getElementById('groupName').innerText = groupName;
+            if (window.location.pathname === '/') window.location.pathname = `${window.location.pathname}${groupName}`;
+            else  window.location.pathname = `${window.location.pathname}/${groupName}`;
+          });
+          $group_picker.firstChild.appendChild($button);
+        });
+      })
+    };
+
+    function login() {
+      const formData = new FormData();
+      formData.append('email', document.getElementById('email').value);
+      formData.append('password', document.getElementById('password').value);
+      httpRequest('POST', 'auth/login', formData, (xhttp) => {
+        localStorage.setItem('user', xhttp.response)
+        document.querySelector('.login').style.display = 'none';
+        httpRequest('GET', 'auth/me', null, (xhttp) => {
+          document.getElementById('username').innerText = JSON.parse(xhttp.response).username;
+          if (itemSelected) editor.setReadOnly(false);
+          enableAdmin(true);
+        })
+      })
+    }
+
+    if (localStorage.getItem('user'))
+      httpRequest('GET', 'auth/me', null, (xhttp) => {
+        document.getElementById('username').innerText = JSON.parse(xhttp.response).username;
+      })
+    else enableAdmin(false);
+
+    function saveList(callback) {
+      function loopGetListData(arrayRef, element, callback) {
+        for (let index = 0; index < element.children.length; index++) {
+          const child = element.children[index];
+          if (child.className.includes('divNav_group')) {
+            const objToSave = {};
+            objToSave.id = parseInt(child.getAttribute('id'), 0);
+            objToSave.group = groupName;
+            objToSave.order_number = index;
+            objToSave.description = child.firstChild.firstChild.innerText;
+            objToSave.children = [];
+            callback(objToSave.children, child.lastChild, callback);
+            arrayRef.push(objToSave);
+          }
+        }
+      }
+      
+      const listToSave = [];
+      loopGetListData(listToSave, $nav, loopGetListData);
+      const formData = new FormData();
+      formData.append('listToSave', JSON.stringify(listToSave));
+
+      httpRequest('POST', 'list', formData, (xhttp) => {
+        const newIdsList = JSON.parse(xhttp.response);
+
+        if (itemSelected) {
+          const currentItemId = parseInt(itemSelected.getAttribute('id'));
+          if (currentItemId < 0)
+            window.history.pushState(null, null, `/${groupName}/${newIdsList.find((i) => i.pivot === currentItemId).id}`);
+        }
+
+        newIdsList.forEach((item) => {
+          document.getElementById(item.pivot).setAttribute('id', item.id);
+        });
+        saveItems = false;
+        if (callback) callback();
+      })
+    }
+
+    function enableAdmin(value) {
+      const $elementsList = document.getElementsByClassName('admin');
+      for (const $element of $elementsList) {
+        $element.style.display = value ? '' : 'none';
+      }
+    }
+
+    function saveContent() {
+      if (saveItems) saveList(saveContent);
+      else if (itemSelected) {
+        const formData = new FormData();
+        formData.append('content', CKEDITOR.instances.editor.getData());
+        formData.append('item_id', itemSelected.getAttribute('id'));
+        formData.append('publicValue', document.getElementById('publicCheckbox').checked);
+        const $select = document.getElementById('revisionSelect');
+  
+        httpRequest('PATCH', `content/${$select.value}`, formData, (xhttp) => {
+          const newId = JSON.parse(xhttp.response);
+          const $select = document.getElementById('revisionSelect');
+          for (const child of $select.children) {
+            if (child.value === newId.pivot.toString()) {
+              child.value = newId.id;
+              child.innerText = `${child.innerText.split(' - ')[0]}${newId.public ? '' : ' - Não oficial'}`;
+            }
+          }
+          $select.value = newId.id;
+          const content = (contents.find((i) => i.id === newId.pivot) || {});
+          content.id = newId.id;
+          content.public = newId.public;
+        })
+      }
+    }
+
+    function loadContent() {
+      httpRequest('GET', `content/${itemSelected.getAttribute('id')}`, null, (xhttp) => {
+        contents = JSON.parse(xhttp.response) || [];
+        const $select = document.getElementById('revisionSelect');
+        $select.innerHTML = '';
+        
+        if (!contents.length) contents.push({id: -1, public: false})
+        let idToSelect = -99;
+
+        contents.forEach((content, index) => {
+          if (!index) $select.value = content.id;
+
+          const $option = document.createElement('option');
+          $option.setAttribute('value', content.id);
+          if (content.public) {
+            idToSelect = content.id;
+            $option.innerText = index + 1;
+          }
+          else $option.innerText = `${index + 1} - Não oficial`;
+          $select.appendChild($option);
+        });
+        if (idToSelect === -99) idToSelect = contents[0].id;
+
+        $select.value = idToSelect;
+        $select.onchange($select);
+      })
+    }
+
+    // função criar nav bar
+    function loadNavBar(data) {
+      // limpa conteúdo inicial
+      $nav.innerHTML = ''
+
+      /**
+       * objeto com todos os itens da nav bar
+       * {id, description, id_parent, children}
+      */
+      const navList = data.filter((item) => !item.id_parent);
+
+      // loop para preencher navList
+      function loopList(list, callback) {
+        list.forEach((item_parent) => {
+          item_parent.children = data.filter((item_child) => item_child.id_parent === item_parent.id);
+          if (item_parent.children.length) callback(item_parent.children, callback);
+        });
+      }
+      loopList(navList, loopList);
+
+      // função para criar a descrição de cada item
+      function itemNavList(item) {
+        const portUrl = window.location.port;
+        const $div_description = document.createElement('div');
+        $div_description.className = 'divNav_description';
+
+        // h2 com a descrição
+        const $description = document.createElement('h2');
+        $description.innerText = item.description || '';
+        $div_description.appendChild($description);
+        $div_description.addEventListener('click', (e) => {
+          if ($description.getAttribute('contenteditable') === 'true') return false;
+          if (itemSelected) itemSelected.firstChild.classList.remove('selected');
+          itemSelected = $div_description.parentElement;
+          $div_description.classList.add('selected');
+          window.history.pushState(null, null, `/${groupName}/${item.id}`);
+          if (document.getElementById('username').innerText) editor.setReadOnly(false);
+          loadContent();
+        });
+
+        // botão ampliar conteúdo
+        const $btn_collapse = document.createElement('button');
+        $btn_collapse.innerText = '+';
+        $btn_collapse.addEventListener('click', (e) => {
+          e.stopPropagation();
+          e.target.innerText = collapseContentNav($div_description.nextElementSibling, e.target.innerText);
+        })
+        $div_description.appendChild($btn_collapse);
+
+        // botão mover conteudo (imagem)
+        const $img_move = document.createElement('img');
+        $img_move.src = `${window.location.protocol}//${window.location.hostname}${portUrl ? ':' : ''}${portUrl}/icons/dots_move.svg`;
+        $img_move.alt = 'Mover instrução';
+        $img_move.className = 'img_move admin';
+        $img_move.onmousedown = dragMouseDown;
+        $img_move.ontouchstart = dragMouseDown;
+        $div_description.appendChild($img_move);
+
+        // botão editar conteudo (imagem)
+        const $img_edit = document.createElement('img');
+        $img_edit.src = `${window.location.protocol}//${window.location.hostname}${portUrl ? ':' : ''}${portUrl}/icons/pen.svg`;
+        $img_edit.alt = 'Editar descrição da instrução';
+        $img_edit.className = 'img_edit_description admin';
+        $img_edit.addEventListener('click', (e) => {
+          e.stopPropagation();
+          saveItems = true;
+          if ($description.getAttribute('contenteditable') === 'true')
+            $description.setAttribute('contenteditable', 'false');
+          else
+            $description.setAttribute('contenteditable', 'true');
+          $description.focus();
+        });
+        $div_description.appendChild($img_edit);
+
+        // áreas mover conteudo
+        const className_regions = 'region_description'
+        // antes
+        const $before = document.createElement('span');
+        $before.innerText = 'Antes';
+        $before.className = className_regions;
+        $before.style.left = '16.6666%';
+        $div_description.appendChild($before);
+        // depois
+        const $after = document.createElement('span');
+        $after.innerText = 'Depois';
+        $after.className = className_regions;
+        $after.style.left = '50%';
+        $div_description.appendChild($after);
+        // dentro
+        const $inside = document.createElement('span');
+        $inside.innerText = 'Dentro';
+        $inside.className = className_regions;
+        $inside.style.left = '83.3333%';
+        $div_description.appendChild($inside);
+
+        return $div_description;
+      }
+
+      function btnNewInstruction(element) {
+        const $btn_new = document.createElement('button');
+        $btn_new.innerText = '+';
+        $btn_new.classList.add('btn_new_instruction');
+        $btn_new.classList.add('admin');
+        $btn_new.addEventListener('click', (e) => {
+          let id = -1;
+          while (document.getElementById(id)) {
+            id -= 1;
+          }
+          loopImplementList({id}, element, null, $btn_new);
+          saveItems = true;
+        })
+        element.appendChild($btn_new);
+      }
+
+      // loop para rodar todos os itens da nav bar
+      function loopImplementList(item, element, callback, element_next = null) {
+        const $element_inner = document.createElement('div');
+        $element_inner.className = 'divNav_group';
+        $element_inner.id = item.id;
+        $element_inner.appendChild(itemNavList(item));
+        const $div_content = document.createElement('div');
+        $div_content.className = 'divNav_content content_retracted';
+        if ((item.children || []).length) {
+          item.children.forEach((item_inner) => callback(item_inner, $div_content, callback));
+        }
+        // btn novo item
+        btnNewInstruction($div_content);
+
+        $element_inner.appendChild($div_content);
+        element.insertBefore($element_inner, element_next);
+      }
+      navList.forEach((item) => loopImplementList(item, $nav, loopImplementList));
+      // btn novo item
+      btnNewInstruction($nav);
+    }
+
+    // mover instrução
+    // touchLocation = in case it is started by touch
+    let $elmnt_move;
+    let $elmnt_selected;
+    let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+    function dragMouseDown(e) {
+      e.stopPropagation();
+      // aparecer regiões
+      $nav.classList.remove('hidde_regions');
+
+      var touchLocation = {};
+      if (e.targetTouches) touchLocation = e.targetTouches[0];
+      $elmnt_selected = e.target.parentElement;
+      $elmnt_selected.style.backgroundColor = 'red';
+      $elmnt_move = $elmnt_selected.firstChild.cloneNode(true);
+      $elmnt_move.className = 'elmnt_move';
+      document.querySelector('body nav').appendChild($elmnt_move);
+      e = e || window.event;
+      e.preventDefault();
+      // get the mouse cursor position at startup:
+      pos3 = touchLocation.pageX || e.clientX;
+      $elmnt_move.style.left = pos3 + "px";
+      pos4 = touchLocation.pageY || e.clientY;
+      $elmnt_move.style.top = pos4 + "px";
+      document.onmouseup = closeDragElement;
+      document.ontouchend = closeDragElement;
+      // call a function whenever the cursor moves:
+      document.onmousemove = elementDrag;
+      document.ontouchmove = elementDrag;
+    }
+
+    function elementDrag(e) {
+      var touchLocation = {};
+      if (e.targetTouches) touchLocation = e.targetTouches[0];
+      e = e || window.event;
+      if (!touchLocation) e.preventDefault();
+      // calculate the new cursor position:
+      pos1 = pos3 - (touchLocation.pageX || e.clientX);
+      pos2 = pos4 - (touchLocation.pageY || e.clientY);
+      pos3 = touchLocation.pageX || e.clientX;
+      pos4 = touchLocation.pageY || e.clientY;
+      // set the element's new position:
+      $elmnt_move.style.top = ($elmnt_move.offsetTop - pos2) + "px";
+      $elmnt_move.style.left = ($elmnt_move.offsetLeft - pos1) + "px";
+    }
+
+    function closeDragElement(e) {
+      // ocultar regiões
+      $nav.classList.add('hidde_regions');
+
+      var touchLocation = {};
+      if (e.targetTouches) touchLocation = e.targetTouches[0];
+      e = e || window.event;
+      e.preventDefault();
+      // stop moving when mouse button is released:
+      $elmnt_move.remove();
+      const cursorX = touchLocation.pageX || e.clientX;
+      let $elmnt_over = document.elementFromPoint(cursorX, touchLocation.pageY || e.clientY);
+      while ($elmnt_over && !$elmnt_over.className.includes('divNav_group')) {
+        $elmnt_over = $elmnt_over.parentElement;
+      }
+      if ($elmnt_over && !isLocalNode($elmnt_selected.parentElement, $elmnt_over)) {
+        saveItems = true;
+        if (cursorX < ($elmnt_over.offsetWidth / 3) + $elmnt_over.offsetLeft)
+          $elmnt_over.parentElement.insertBefore($elmnt_selected.parentElement, $elmnt_over);
+        else if (cursorX < ($elmnt_over.offsetWidth / 3) * 2 + $elmnt_over.offsetLeft)
+          $elmnt_over.parentElement.insertBefore($elmnt_selected.parentElement, $elmnt_over.nextElementSibling);
+        else
+          $elmnt_over.lastChild.appendChild($elmnt_selected.parentElement);
+      }
+      $elmnt_selected.removeAttribute("style");
+      document.onmouseup = null;
+      document.ontouchend = null;
+      document.onmousemove = null;
+      document.ontouchmove = null;
+    }
+
+    function isLocalNode(node, target) {
+      do {
+        if (node === target) return true;
+        target = target.parentNode;
+      } while (target);
+      return false;
+    }
+  </script>
+<body>
+</body>
+
+</html>
