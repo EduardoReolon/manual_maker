@@ -6,7 +6,7 @@
 
 const Content = use('App/Models/Content')
 const Database = use('Database')
-const ContentTransformer = use('App/transformers/ContentTransformer')
+const ContentTransformer = use('App/Transformers/ContentTransformer')
 const Item = use('App/Models/Item')
 const PermissionService = use('App/Services/Permission')
 

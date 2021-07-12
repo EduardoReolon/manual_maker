@@ -26,7 +26,7 @@ class ItemTransformer extends BumblebeeTransformer {
   }
 
   includeContent (model) {
-    const ContentTransformer = use('App/transformers/ContentTransformer')
+    const ContentTransformer = use('App/Transformers/ContentTransformer')
     return this.collection(model.getRelated('content'), ContentTransformer)
   }
 }
