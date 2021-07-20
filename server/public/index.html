@@ -36,7 +36,7 @@
       cursor: move;
       position: absolute;
       z-index: 1;
-      transform: translate(-50%, -50%);
+      transform: translate(-50%, -100%);
       margin: 0;
       padding: 0;
     }
@@ -648,12 +648,13 @@
       $elmnt_selected.style.backgroundColor = 'red';
       $elmnt_move = $elmnt_selected.firstChild.cloneNode(true);
       $elmnt_move.className = 'elmnt_move';
-      document.querySelector('body nav').appendChild($elmnt_move);
+      $elmnt_move.style.margin = '0';
+      $nav.appendChild($elmnt_move);
       e = e || window.event;
       e.preventDefault();
       // get the mouse cursor position at startup:
       pos3 = touchLocation.pageX || e.clientX;
-      $elmnt_move.style.left = pos3 + "px";
+      $elmnt_move.style.left = pos3 - $nav.getBoundingClientRect().left + "px";
       pos4 = touchLocation.pageY || e.clientY;
       $elmnt_move.style.top = pos4 + "px";
       document.onmouseup = closeDragElement;
@@ -695,12 +696,12 @@
       }
       if ($elmnt_over && !isLocalNode($elmnt_selected.parentElement, $elmnt_over)) {
         saveItems = true;
-        if (cursorX < ($elmnt_over.offsetWidth / 3) + $elmnt_over.offsetLeft)
+        if (cursorX < ($elmnt_over.offsetWidth / 3) + $elmnt_over.getBoundingClientRect().left)
           $elmnt_over.parentElement.insertBefore($elmnt_selected.parentElement, $elmnt_over);
-        else if (cursorX < ($elmnt_over.offsetWidth / 3) * 2 + $elmnt_over.offsetLeft)
+        else if (cursorX < ($elmnt_over.offsetWidth / 3) * 2 + $elmnt_over.getBoundingClientRect().left)
           $elmnt_over.parentElement.insertBefore($elmnt_selected.parentElement, $elmnt_over.nextElementSibling);
         else
-          $elmnt_over.lastChild.appendChild($elmnt_selected.parentElement);
+          $elmnt_over.lastChild.insertBefore($elmnt_selected.parentElement, $elmnt_over.lastChild.lastChild);
       }
       $elmnt_selected.removeAttribute("style");
       document.onmouseup = null;
