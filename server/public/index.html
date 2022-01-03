@@ -9,7 +9,8 @@
   <meta name="keywords" content="manual maker, manual, instruções, instructions, regras, orientações">
   <title>Manual Maker</title>
 
-  <script src="https://cdn.ckeditor.com/4.16.1/standard-all/ckeditor.js"></script>
+  <script src="https://cdn.ckeditor.com/4.17.1/standard-all/ckeditor.js"></script>
+  <script src="./openlink/plugin.js"></script>
 
   <style>
     html{height: 100%;}
@@ -294,11 +295,11 @@
     }
 
     // editor content
-    CKEDITOR.replace('editor', {
+    const instance = CKEDITOR.replace('editor', {
       extraAllowedContent: 'h3{clear};h2{line-height};h2 h3{margin-left,margin-top}',
 
       // Adding drag and drop image upload.
-      extraPlugins: 'print,format,font,colorbutton,justify,uploadimage',
+      extraPlugins: 'print,format,font,colorbutton,justify,uploadimage,openlink',
       uploadUrl: `/api/upload/${groupName}`,
 
       // Configure your file manager integration. This example uses CKFinder 3 for PHP.
@@ -311,6 +312,16 @@
 
       removeDialogTabs: 'image:advanced;link:advanced'
     });
+
+    instance.on( 'contentDom', function() {
+      var editable = instance.editable();
+      editable.attachListener( editable, 'click', function( evt ) {
+        var link = new CKEDITOR.dom.elementPath( evt.data.getTarget(), this ).contains( 'a' );
+        if ( link && evt.data.$.button != 2 && link.isReadOnly() ) {
+          window.open( link.getAttribute( 'href' ) );
+        }
+      }, null, null, 15 );
+    } );
 
     // The instanceReady event is fired when an instance of CKEditor 4 has finished
     // its initialization.
@@ -375,6 +386,13 @@
       })
     };
 
+    function enableAdmin(value) {
+      const $elementsList = document.getElementsByClassName('admin');
+      for (var i = 0; i < $elementsList.length; i++) {
+        $elementsList[i].style.display = value ? '' : 'none';
+      }
+    }
+
     function login() {
       const formData = new FormData();
       formData.append('email', document.getElementById('email').value);
@@ -433,13 +451,6 @@
         saveItems = false;
         if (callback) callback();
       })
-    }
-
-    function enableAdmin(value) {
-      const $elementsList = document.getElementsByClassName('admin');
-      for (const $element of $elementsList) {
-        $element.style.display = value ? '' : 'none';
-      }
     }
 
     function saveContent() {
@@ -630,6 +641,8 @@
       navList.forEach((item) => loopImplementList(item, $nav, loopImplementList));
       // btn novo item
       btnNewInstruction($nav);
+
+      if (!localStorage.getItem('user')) enableAdmin(false);
     }
 
     // mover instrução

@@ -45,6 +45,11 @@ Route.group(() => {
   .prefix('api/')
   .middleware('auth')
 
-Route.any('*', async ({ response }) => {
+Route.any('*', async ({ params, response }) => {
+  if (params[0].includes('openlink')) {
+    const path = params[0].split('/');
+    path.splice(0, path.indexOf('openlink') + 1);
+    return response.download(Helpers.appRoot(`public/openlink/${path.join('/')}`));
+  }
   return response.download(Helpers.appRoot('public/index.html'))
 })
