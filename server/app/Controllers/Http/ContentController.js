@@ -55,10 +55,11 @@ class ContentController {
         .where('item_id', id)
         .orderBy('created_at')
         .fetch()
+      const external = await Item.findOrFail(id).external;
       
       content = await transform.collection(content, ContentTransformer)
 
-      return response.status(201).send(content)
+      return response.status(201).send(content);
     } catch (error) {
       console.log(error)
       return response.status(400).send({msg: 'error'})
@@ -74,7 +75,7 @@ class ContentController {
    * @param {Response} ctx.response
    */
   async update ({ params: {id}, request, auth, response }) {
-    let {content, item_id, publicValue} = request.all();
+    let {content, item_id, publicValue, external} = request.all();
     const user = await auth.getUser();
 
     const trx = await Database.beginTransaction()
@@ -82,6 +83,7 @@ class ContentController {
     try {
       id = parseInt(id);
       publicValue = publicValue === 'true' ? true : false;
+      external = external === 'true' ? true : false;
 
       const item = await Item.findOrFail(item_id);
 
@@ -103,11 +105,16 @@ class ContentController {
       contentBD.content = content;
       contentBD.public = publicValue;
 
+      if (item.external !== external) {
+        item.external = external;
+        await item.save(trx);
+      }
+
       await contentBD.save(trx);
       
       await trx.commit();
 
-      return response.status(200).send({pivot: id, id: contentBD.id, public: publicValue})
+      return response.status(200).send({pivot: id, id: contentBD.id, public: publicValue, external: item.external})
     } catch (error) {
       await trx.rollback()
       console.log(error)

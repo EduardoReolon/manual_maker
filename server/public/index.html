@@ -22,13 +22,13 @@
     }
     body h1{
       position: absolute;
-      top: 0;
+      top: 20px;
       left: 0;
       margin: 0;
     }
     nav{
       position: absolute;
-      top: 40px;
+      top: 60px;
       left: 0;
       width: 300px;
       height: calc(100% - 40px);
@@ -211,6 +211,14 @@
     }
   </style>
 </head>
+  <label style="position: absolute;">Visualização completa
+    <input type="checkbox" id="fullview"
+      onchange="((e) => {
+        localStorage.setItem('fullView', e.checked);
+        fullView = e.checked;
+        hiddeExternal();
+      })(this)">
+  </label>
   <h1 id="groupName"></h1>
   <nav class="hidde_regions"></nav>
   <main>
@@ -222,6 +230,7 @@
       const content = (contents.find((item) => item.id === parseInt(e.value, 0)) || {});
       CKEDITOR.instances.editor.setData(content.content);
       document.getElementById('publicCheckbox').checked = content.public;
+      document.getElementById('externalCheckbox').checked = items[itemSelected.getAttribute('id')].external;
     })(this)"></select>
     <button onclick="(() => {
       if (itemSelected) {
@@ -239,6 +248,7 @@
       }
     })(this)" class="admin">Nova revisão</button>
     <label class="admin">Oficial<input type="checkbox" id="publicCheckbox"></label>
+    <label class="admin">Conteúdo externo<input type="checkbox" id="externalCheckbox"></label>
     <br>
     <button onclick="(() => {document.querySelector('.login').style.display = 'block';})()">Login</button>
     <span id="username"></span>
@@ -267,9 +277,14 @@
     let itemSelected = null;
     let contents = [];
     let groupName = 'geral';
+    const items = [];
     let baseURL = `${window.location.protocol}//${window.location.host}/api`;
     let editor;
     const $nav = document.querySelector('body nav');
+    
+    // ajusta visualização completa
+    let fullView = localStorage.getItem('fullView') === 'true' ? true : false;
+    if (fullView) document.getElementById('fullview').checked = fullView;
 
     // verifica url e acerta visualização
     if (window.location.pathname === '/') loadListGroups();
@@ -393,6 +408,15 @@
       }
     }
 
+    function hiddeExternal() {
+      items.forEach((item, index) => {
+        if (item) {
+          const visible = fullView || item.external ? true : false;
+          document.getElementById(index.toString()).style.display = !visible ? 'none' : '';
+        }
+      });
+    }
+
     function login() {
       const formData = new FormData();
       formData.append('email', document.getElementById('email').value);
@@ -460,6 +484,7 @@
         formData.append('content', CKEDITOR.instances.editor.getData());
         formData.append('item_id', itemSelected.getAttribute('id'));
         formData.append('publicValue', document.getElementById('publicCheckbox').checked);
+        formData.append('external', document.getElementById('externalCheckbox').checked);
         const $select = document.getElementById('revisionSelect');
   
         httpRequest('PATCH', `content/${$select.value}`, formData, (xhttp) => {
@@ -471,6 +496,9 @@
               child.innerText = `${child.innerText.split(' - ')[0]}${newId.public ? '' : ' - Não oficial'}`;
             }
           }
+          if (!items[itemSelected.getAttribute('id')]) items[itemSelected.getAttribute('id')] = {};
+          items[itemSelected.getAttribute('id')].external = newId.external;
+          hiddeExternal();
           $select.value = newId.id;
           const content = (contents.find((i) => i.id === newId.pivot) || {});
           content.id = newId.id;
@@ -626,6 +654,7 @@
         const $element_inner = document.createElement('div');
         $element_inner.className = 'divNav_group';
         $element_inner.id = item.id;
+        items[item.id] = { external: item.external };
         $element_inner.appendChild(itemNavList(item));
         const $div_content = document.createElement('div');
         $div_content.className = 'divNav_content content_retracted';
@@ -643,6 +672,7 @@
       btnNewInstruction($nav);
 
       if (!localStorage.getItem('user')) enableAdmin(false);
+      hiddeExternal();
     }
 
     // mover instrução

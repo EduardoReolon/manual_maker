@@ -11,6 +11,7 @@ class ItemSchema extends Schema {
       table.integer('order_number').unsigned().notNullable().defaultTo(0)
       table.string('description', 255)
       table.integer('id_parent').unsigned()
+      table.boolean('external').notNullable().defaultTo(false)
       table.timestamps()
     })
   }

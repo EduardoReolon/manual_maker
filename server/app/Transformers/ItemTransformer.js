@@ -21,7 +21,8 @@ class ItemTransformer extends BumblebeeTransformer {
     return {
       id: model.id,
       description: model.description,
-      id_parent: model.id_parent
+      id_parent: model.id_parent,
+      external: Boolean(model.external),
     }
   }
 
