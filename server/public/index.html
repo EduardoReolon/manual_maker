@@ -653,7 +653,7 @@
           while (document.getElementById(id)) {
             id -= 1;
           }
-          loopImplementList({id}, element, null, $btn_new);
+          loopImplementList({id, description: `Novo (${id * -1})`}, element, null, $btn_new);
           saveItems = true;
         })
         element.appendChild($btn_new);
