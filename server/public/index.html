@@ -664,6 +664,7 @@
         const $element_inner = document.createElement('div');
         $element_inner.className = 'divNav_group';
         $element_inner.id = item.id;
+        if (typeof item.external !== 'boolean') item.external = true;
         items[item.id] = { external: item.external };
         $element_inner.appendChild(itemNavList(item));
         const $div_content = document.createElement('div');
