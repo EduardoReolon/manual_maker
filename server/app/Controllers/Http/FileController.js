@@ -1,6 +1,7 @@
 'use strict'
 
 const { manage_single_upload, manage_multiple_uploads } = use('App/Helpers')
+const Env = use('Env')
 
 class FileController {
   /**
@@ -28,7 +29,7 @@ class FileController {
       return response.status(201).send({
         fileName: files.successes[0].fileName,
         uploaded: 1,
-        url: `/storage/${groupName}/${files.successes[0].fileName}`
+        url: `${Env.get('startPathFiles', '')}/storage/${groupName}/${files.successes[0].fileName}`
       })
     } catch (error) {
       console.log(error)

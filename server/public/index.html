@@ -222,7 +222,7 @@
   <h1 id="groupName"></h1>
   <nav class="hidde_regions"></nav>
   <main>
-    <button onclick="(() => {window.location.pathname = '/';})()">Selecionar grupo</button>
+    <button onclick="(() => {window.location.pathname = startPath.join('/');})()">Selecionar grupo</button>
     <button onclick="saveList()" class="admin">Salvar lista</button>
     <button onclick="saveContent()" class="admin">Salvar conteúdo</button>
     <span>Revisão</span>
@@ -285,16 +285,26 @@
     // ajusta visualização completa
     let fullView = localStorage.getItem('fullView') === 'true' ? true : false;
     if (fullView) document.getElementById('fullview').checked = fullView;
-
+    
     // verifica url e acerta visualização
-    if (window.location.pathname === '/') loadListGroups();
+    const startPath = [];
+    if (window.location.hostname.includes('paranacidade')) startPath.push('pmo');
+    // startPath.push('pmo');
+    let historyModeStart = '/';
+    const fullPath = window.location.pathname.replace(/\%20/g, ' ').split('/').slice(1);
+    startPath.forEach((p) => {
+      if (fullPath[0] === p) fullPath.splice(0, 1);
+    });
+    if (fullPath.length === 1 && fullPath[0] === '') fullPath.splice(0, 1);
+    if (!startPath.length) historyModeStart = '';
+    if (!fullPath.length) loadListGroups();
     else {
-      groupName = window.location.pathname.split('/')[1].replace(/\%20/g, ' ');
+      groupName = fullPath[0];
       document.getElementById('groupName').innerText = groupName;
       // requisição da lista inicial
       httpRequest('GET', `list/${groupName}`, null, (xhttp) => {
         loadNavBar(JSON.parse(xhttp.responseText));
-        const idUrl = parseInt(window.location.pathname.split('/')[2]);
+        const idUrl = parseInt(fullPath[1]);
         if (!isNaN(idUrl)) {
           itemSelected = document.getElementById(idUrl);
           itemSelected.firstChild.classList.add('selected');
@@ -393,8 +403,7 @@
           $button.addEventListener('click', (e) => {
             groupName = e.target.innerText;
             document.getElementById('groupName').innerText = groupName;
-            if (window.location.pathname === '/') window.location.pathname = `${window.location.pathname}${groupName}`;
-            else  window.location.pathname = `${window.location.pathname}/${groupName}`;
+            window.location.pathname = `${startPath.join('/')}/${groupName}`;
           });
           $group_picker.firstChild.appendChild($button);
         });
@@ -466,7 +475,7 @@
         if (itemSelected) {
           const currentItemId = parseInt(itemSelected.getAttribute('id'));
           if (currentItemId < 0)
-            window.history.pushState(null, null, `/${groupName}/${newIdsList.find((i) => i.pivot === currentItemId).id}`);
+            window.history.pushState(null, null, `${historyModeStart}${startPath.join('/')}/${groupName}/${newIdsList.find((i) => i.pivot === currentItemId).id}`);
         }
 
         newIdsList.forEach((item) => {
@@ -570,7 +579,7 @@
           if (itemSelected) itemSelected.firstChild.classList.remove('selected');
           itemSelected = $div_description.parentElement;
           $div_description.classList.add('selected');
-          window.history.pushState(null, null, `/${groupName}/${item.id}`);
+          window.history.pushState(null, null, `${historyModeStart}${startPath.join('/')}/${groupName}/${item.id}`);
           if (document.getElementById('username').innerText) editor.setReadOnly(false);
           loadContent();
         });
