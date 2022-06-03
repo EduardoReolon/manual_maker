@@ -297,6 +297,7 @@
     });
     if (fullPath.length === 1 && fullPath[0] === '') fullPath.splice(0, 1);
     if (!startPath.length) historyModeStart = '';
+    baseURL = `${baseURL}${historyModeStart}${fullPath.join('/')}/api`;
     if (!fullPath.length) loadListGroups();
     else {
       groupName = fullPath[0];
