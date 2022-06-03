@@ -523,7 +523,7 @@
         const $select = document.getElementById('revisionSelect');
         $select.innerHTML = '';
         
-        if (!contents.length) contents.push({id: -1, public: false})
+        if (!contents.length) contents.push({id: -1, public: false, external: true})
         let idToSelect = -99;
 
         contents.forEach((content, index) => {
