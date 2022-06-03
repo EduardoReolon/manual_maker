@@ -297,7 +297,7 @@
     });
     if (fullPath.length === 1 && fullPath[0] === '') fullPath.splice(0, 1);
     if (!startPath.length) historyModeStart = '';
-    baseURL = `${baseURL}${historyModeStart}${startPath.join('/')}/api`;
+    baseURL = `${baseURL}${historyModeStart}${startPath.join('/')}`;
     if (!fullPath.length) loadListGroups();
     else {
       groupName = fullPath[0];
@@ -362,7 +362,7 @@
       let xhttp = new XMLHttpRequest();
   
       // download da lista geral
-      xhttp.open(verb, `${baseURL}/${urlEnd || ''}`, true);
+      xhttp.open(verb, `${baseURL}/api/${urlEnd || ''}`, true);
 
       // headers
       if (localStorage.getItem('user')) {
@@ -596,7 +596,7 @@
 
         // botão mover conteudo (imagem)
         const $img_move = document.createElement('img');
-        $img_move.src = `${window.location.protocol}//${window.location.hostname}${portUrl ? ':' : ''}${portUrl}/icons/dots_move.svg`;
+        $img_move.src = `${baseURL}/icons/dots_move.svg`;
         $img_move.alt = 'Mover instrução';
         $img_move.className = 'img_move admin';
         $img_move.onmousedown = dragMouseDown;
@@ -605,7 +605,7 @@
 
         // botão editar conteudo (imagem)
         const $img_edit = document.createElement('img');
-        $img_edit.src = `${window.location.protocol}//${window.location.hostname}${portUrl ? ':' : ''}${portUrl}/icons/pen.svg`;
+        $img_edit.src = `${baseURL}/icons/pen.svg`;
         $img_edit.alt = 'Editar descrição da instrução';
         $img_edit.className = 'img_edit_description admin';
         $img_edit.addEventListener('click', (e) => {
