@@ -326,13 +326,13 @@
 
       // Adding drag and drop image upload.
       extraPlugins: 'print,format,font,colorbutton,justify,uploadimage,openlink',
-      uploadUrl: `/api/upload/${groupName}`,
+      uploadUrl: `${historyModeStart}${startPath.join('/')}/api/upload/${groupName}`,
 
       // Configure your file manager integration. This example uses CKFinder 3 for PHP.
-      filebrowserBrowseUrl: `/api/upload/${groupName}`,
-      filebrowserImageBrowseUrl: `/api/upload/${groupName}`,
-      filebrowserUploadUrl: `/api/upload/${groupName}`,
-      filebrowserImageUploadUrl: `/api/upload/${groupName}`,
+      filebrowserBrowseUrl: `${historyModeStart}${startPath.join('/')}/api/upload/${groupName}`,
+      filebrowserImageBrowseUrl: `${historyModeStart}${startPath.join('/')}/api/upload/${groupName}`,
+      filebrowserUploadUrl: `${historyModeStart}${startPath.join('/')}/api/upload/${groupName}`,
+      filebrowserImageUploadUrl: `${historyModeStart}${startPath.join('/')}/api/upload/${groupName}`,
 
       height: 560,
 
