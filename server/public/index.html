@@ -278,7 +278,7 @@
     let contents = [];
     let groupName = 'geral';
     const items = [];
-    let baseURL = `${window.location.protocol}//${window.location.host}/api`;
+    let baseURL = `${window.location.protocol}//${window.location.host}`;
     let editor;
     const $nav = document.querySelector('body nav');
     
@@ -297,7 +297,7 @@
     });
     if (fullPath.length === 1 && fullPath[0] === '') fullPath.splice(0, 1);
     if (!startPath.length) historyModeStart = '';
-    baseURL = `${baseURL}${historyModeStart}${fullPath.join('/')}/api`;
+    baseURL = `${baseURL}${historyModeStart}${startPath.join('/')}/api`;
     if (!fullPath.length) loadListGroups();
     else {
       groupName = fullPath[0];
