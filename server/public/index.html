@@ -54,6 +54,8 @@
       background-color: white;
       box-shadow: -2px 2px 2px black;
       position: relative;
+      max-height: 500px;
+      transition: max-height 1s ease-in-out 0s;
     }
     .btn_new_instruction{
       cursor: pointer;
@@ -71,10 +73,10 @@
       margin: 5px auto;
     }
     .divNav_content:empty:not(.content_retracted){
-      height: 10px;
+      max-height: 10px;
     }
     .content_retracted{
-      height: 0;
+      max-height: 0;
     }
     .divNav_description{
       margin-top: 5px;
@@ -586,13 +588,15 @@
         });
 
         // botão ampliar conteúdo
-        const $btn_collapse = document.createElement('button');
-        $btn_collapse.innerText = '+';
-        $btn_collapse.addEventListener('click', (e) => {
-          e.stopPropagation();
-          e.target.innerText = collapseContentNav($div_description.nextElementSibling, e.target.innerText);
-        })
-        $div_description.appendChild($btn_collapse);
+        if ((item.children || []).length || (localStorage.getItem('user') || '').length) {
+          const $btn_collapse = document.createElement('button');
+          $btn_collapse.innerText = '+';
+          $btn_collapse.addEventListener('click', (e) => {
+            e.stopPropagation();
+            e.target.innerText = collapseContentNav($div_description.nextElementSibling, e.target.innerText);
+          })
+          $div_description.appendChild($btn_collapse);
+        }
 
         // botão mover conteudo (imagem)
         const $img_move = document.createElement('img');
