@@ -30,7 +30,7 @@ class ItemController {
       listGroups = await transform.collection(listGroups, ListGroupTransformer);
       return response.status(201).send(listGroups);
     } catch (error) {
-      console.log(error)
+      console.error(error)
       return response.status(400).send('Error')
     }
   }
@@ -63,11 +63,13 @@ class ItemController {
           let itemBD = items.rows.find((i) => i.id === item.id);
           let idPivot = item.id < 0 ? item.id : 0;
           if (!itemBD) itemBD = new Items();
-          if (itemBD.id_parent !== id_parent || itemBD.description !== item.description || itemBD.order_number !== item.order_number) {
+          if (itemBD.id_parent !== id_parent || itemBD.description !== item.description
+            || itemBD.order_number !== item.order_number || itemBD.external !== item.external) {
             itemBD.id_parent = id_parent;
             itemBD.group = item.group;
             itemBD.order_number = item.order_number;
             itemBD.description = item.description;
+            itemBD.external = item.external;
             await itemBD.save(trx)
             if (idPivot) newIdsList.push({pivot: idPivot, id: itemBD.id});
           }
@@ -81,7 +83,7 @@ class ItemController {
       return response.status(200).send(newIdsList)
     } catch (error) {
       await trx.rollback()
-      console.log(error)
+      console.error(error)
       return response.status(400).send('Error')
     }
   }
@@ -106,7 +108,7 @@ class ItemController {
 
       return response.status(201).send(items);
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
   }
 

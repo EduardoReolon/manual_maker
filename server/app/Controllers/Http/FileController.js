@@ -32,7 +32,7 @@ class FileController {
         url: `${Env.get('startPathFiles', '')}/storage/${groupName}/${files.successes[0].fileName}`
       })
     } catch (error) {
-      console.log(error)
+      console.error(error)
       return response.status(400).send({
         message: 'Não foi possível processar a sua solicitação!'
       })

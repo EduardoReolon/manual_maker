@@ -61,7 +61,7 @@ class ContentController {
 
       return response.status(201).send(content);
     } catch (error) {
-      console.log(error)
+      console.error(error)
       return response.status(400).send({msg: 'error'})
     }
   }
@@ -117,7 +117,7 @@ class ContentController {
       return response.status(200).send({pivot: id, id: contentBD.id, public: publicValue, external: item.external})
     } catch (error) {
       await trx.rollback()
-      console.log(error)
+      console.error(error)
       return response.status(400).send({msg: 'error'})
     }
   }

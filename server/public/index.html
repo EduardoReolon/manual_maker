@@ -253,7 +253,12 @@
       }
     })(this)" class="admin">Nova revisão</button>
     <label class="admin">Oficial<input type="checkbox" id="publicCheckbox"></label>
-    <label class="admin">Conteúdo externo<input type="checkbox" id="externalCheckbox"></label>
+    <label class="admin">
+      Conteúdo externo
+      <input type="checkbox" id="externalCheckbox" onchange="if (itemSelected) {
+        items[itemSelected.getAttribute('id')].external = event.target.checked;
+      }">
+    </label>
     <br>
     <button onclick="(() => {document.querySelector('.login').style.display = 'block';})()">Login</button>
     <span id="username"></span>
@@ -463,6 +468,7 @@
             objToSave.group = groupName;
             objToSave.order_number = index;
             objToSave.description = child.firstChild.firstChild.innerText;
+            objToSave.external = items[objToSave.id].external;
             objToSave.children = [];
             callback(objToSave.children, child.lastChild, callback);
             arrayRef.push(objToSave);
@@ -486,6 +492,7 @@
 
         newIdsList.forEach((item) => {
           document.getElementById(item.pivot).setAttribute('id', item.id);
+          items[item.id] = items[item.pivot];
         });
         saveItems = false;
         if (callback) callback();
@@ -585,21 +592,20 @@
           if (itemSelected) itemSelected.firstChild.classList.remove('selected');
           itemSelected = $div_description.parentElement;
           $div_description.classList.add('selected');
-          window.history.pushState(null, null, `${historyModeStart}${startPath.join('/')}/${groupName}/${item.id}`);
+          window.history.pushState(null, null, `${historyModeStart}${startPath.join('/')}/${groupName}/${itemSelected.getAttribute('id')}`);
           if (document.getElementById('username').innerText) editor.setReadOnly(false);
           loadContent();
         });
 
         // botão ampliar conteúdo
-        if ((item.children || []).length || (localStorage.getItem('user') || '').length) {
-          const $btn_collapse = document.createElement('button');
-          $btn_collapse.innerText = '+';
-          $btn_collapse.addEventListener('click', (e) => {
-            e.stopPropagation();
-            e.target.innerText = collapseContentNav($div_description.nextElementSibling, e.target.innerText);
-          })
-          $div_description.appendChild($btn_collapse);
-        }
+        const $btn_collapse = document.createElement('button');
+        $btn_collapse.innerText = '+';
+        $btn_collapse.addEventListener('click', (e) => {
+          e.stopPropagation();
+          e.target.innerText = collapseContentNav($div_description.nextElementSibling, e.target.innerText);
+        })
+        if (!(item.children || []).length) $btn_collapse.classList.add('admin')
+        $div_description.appendChild($btn_collapse);
 
         // botão mover conteudo (imagem)
         const $img_move = document.createElement('img');

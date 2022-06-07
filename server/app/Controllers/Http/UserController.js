@@ -28,7 +28,7 @@ class UserController {
       userData.roles = await user.getRoles()
       return response.send(userData)
     } catch (error) {
-      console.log(error)      
+      console.error(error)      
       return response.status(400).send({
         message: 'error retrieving data'
       })
